@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mbse4u-sysmlv2-helpers"
-version = "0.1.2"
+version = "0.1.3"
 description = "Generic SysML v2 API helpers from MBSE4U"
 authors = [
   { name="Tim Weilkiens" },
