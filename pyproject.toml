@@ -3,13 +3,13 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mbse4u-sysmlv2"
-version = "0.1.0"
+name = "mbse4u-sysmlv2-helpers"
+version = "0.1.2"
 description = "Generic SysML v2 API helpers from MBSE4U"
 authors = [
   { name="Tim Weilkiens" },
 ]
-readme = "README.md"
+readme = {file = "README.md", content-type = "text/markdown"} # Explicitly set type
 requires-python = ">=3.8"
 dependencies = [
   "requests",
