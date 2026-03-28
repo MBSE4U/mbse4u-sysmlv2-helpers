@@ -16,4 +16,4 @@ dependencies = [
 ]
 
 [tool.setuptools]
-py-modules = ["mbse4u_sysmlv2_api_helpers"]
+py-modules = ["mbse4u_sysmlv2_helpers", "mbse4u_sysmlv2_auth"]
