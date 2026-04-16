@@ -253,8 +253,8 @@ def get_commits(server_url: str, project_id: str) -> List[Dict[str, Any]]:
             status_code=response.status_code,
             message="Expected a list of commits in the response.",
         )
-    # Sort by 'createdAt' if present, otherwise by 'id'
-    sorted_commits = sorted(commits, key=lambda x: x.get('createdAt', x.get('id', '')))
+    # Sort by 'created' if present, otherwise by '@id'
+    sorted_commits = sorted(commits, key=lambda x: x.get('created', x.get('@id', '')))
     return sorted_commits
 
 def get_contained_elements(server_url: str, project_id: str, commit_id: str, element_id: str, kind: str, elementKind: str = 'ownedElement') -> List[Dict[str, Any]]:
