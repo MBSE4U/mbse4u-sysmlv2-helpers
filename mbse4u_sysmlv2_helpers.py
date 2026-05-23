@@ -259,7 +259,7 @@ def get_commits(server_url: str, project_id: str) -> List[Dict[str, Any]]:
             status_code=response.status_code,
             message="Expected a list of commits in the response.",
         )
-    # Sort by 'createdAt' if present, otherwise by 'id'
+    # Sort by 'created' if present, otherwise by '@id'
     sorted_commits = sorted(commits, key=lambda x: x.get('created', x.get('@id', '')))
     return sorted_commits
 
