@@ -16,8 +16,8 @@
 #    limitations under the License.
 #
 #    Author: Tim Weilkiens
-#    Date: 2026-03-28
-#    Version: 1.0.1
+#    Date: 2026-05-23
+#    Version: 1.0.5
 #
 #    Copyright 2026 MBSE4U - Tim Weilkiens. Licensed under the Apache License, Version 2.0.
 
@@ -123,6 +123,12 @@ def check_specialization_hierarchy(query_url: str, element: Dict[str, Any], supe
                  general_el = get_element_fromAPI(query_url, general['@id'])
                  if general_el and check_specialization_hierarchy(query_url, general_el, super_element, visited):
                      return True
+    # Check definition
+    print(f"Checking definition for {element.get('name')}: {element.get('definition')}")
+    for definition in element.get('definition', []):
+        if definition and check_specialization_hierarchy(query_url, definition, super_element, visited):
+            return True
+
     return False
 
 def find_element_by_id(aggregated_results: List[Dict[str, Any]], target_id: str) -> Optional[Dict[str, Any]]:
@@ -254,7 +260,7 @@ def get_commits(server_url: str, project_id: str) -> List[Dict[str, Any]]:
             message="Expected a list of commits in the response.",
         )
     # Sort by 'createdAt' if present, otherwise by 'id'
-    sorted_commits = sorted(commits, key=lambda x: x.get('createdAt', x.get('id', '')))
+    sorted_commits = sorted(commits, key=lambda x: x.get('created', x.get('@id', '')))
     return sorted_commits
 
 def get_contained_elements(server_url: str, project_id: str, commit_id: str, element_id: str, kind: str, elementKind: str = 'ownedElement') -> List[Dict[str, Any]]:
@@ -734,6 +740,25 @@ def get_metadatausage_annotatedElement_ids(server_url: str, project_id: str, com
     print(f"get_metadatausage_annotatedElement_ids returns: {results}")
     return results
 
+def get_multiplicity(server_url, project_id, commit_id, element_id):
+
+    query_url = get_commit_url(server_url, project_id, commit_id)
+    multiplicity = {'lowerBound': 0, 'upperBound': '*'}                     
+    
+    element = get_element_fromAPI(query_url, element_id)
+    if element.get('multiplicity'):
+        multiplicity_element = get_element_fromAPI(query_url, element.get('multiplicity').get('@id'))
+        if multiplicity_element:
+            lowerBound = get_element_fromAPI(query_url, multiplicity_element.get('lowerBound').get('@id'))
+            upperBound = get_element_fromAPI(query_url, multiplicity_element.get('upperBound').get('@id'))
+            multiplicity['lowerBound'] = lowerBound.get('value')
+            multiplicity['upperBound'] = upperBound.get('value')
+    else:
+        return 
+    
+    return multiplicity
+
+
 def get_owned_usages(server_url, project_id, commit_id, owner, feature_kind = None, feature_name = None, includeInherited = True):
     """
     Fetches owned usages for the owner from both Usage and Definition and adds them to the owner object.
@@ -907,25 +932,25 @@ def load_model_cache(server_url: str, project_id: str, commit_id: str, page_size
     commit_url = f"{server_url}/projects/{project_id}/commits/{commit_id}"
     elements_url = f"{commit_url}/elements?page%5Bsize%5D={page_size}"
     
-    print(f"Loading cache from {elements_url}")
-    response = session.get(elements_url)
-    _check_response(response, elements_url)
+    print(f"Loading cache from {elements_url} and {relationships_url}")
+    response_elements = session.get(elements_url)
+    _check_response(response_elements, elements_url)
 
-    elements = response.json()
+    elements = response_elements.json()
     print(f"Loaded {len(elements)} elements for cache.")
 
     if not isinstance(elements, list):
         raise SysMLV2APIError(
-            status_code=response.status_code,
+            status_code=response_elements.status_code,
             message=f"Expected list of elements, got {type(elements)}",
         )
-         
+
     # Populate Cache
     cache_entry = {}
     for el in elements:
         if '@id' in el:
             cache_entry[el['@id']] = el
-            
+
     ELEMENT_CACHE[commit_url] = cache_entry
     print(f"Cache loaded for {commit_url} with {len(cache_entry)} elements.")
     return len(cache_entry)
