@@ -932,7 +932,7 @@ def load_model_cache(server_url: str, project_id: str, commit_id: str, page_size
     commit_url = f"{server_url}/projects/{project_id}/commits/{commit_id}"
     elements_url = f"{commit_url}/elements?page%5Bsize%5D={page_size}"
     
-    print(f"Loading cache from {elements_url} and {relationships_url}")
+    print(f"Loading cache from {elements_url}")
     response_elements = session.get(elements_url)
     _check_response(response_elements, elements_url)
 
